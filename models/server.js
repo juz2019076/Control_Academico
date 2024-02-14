@@ -7,9 +7,11 @@ class Server{
     constructor(){
         this.app = express();
         this.port = process.env.PORT;
+        this.estudiantePath = '/api/estudiante';
 
         this.conectarDB();
         this.middlewares();
+        this.routes();
     }
 
     async conectarDB(){
@@ -19,7 +21,14 @@ class Server{
     middlewares(){
         this.app.use(express.static('public'));
         this.app.use(cors());
+        this.app.use(express.json());
     }
+
+    routes(){
+        this.app.use(this., require('../routes/estudiante.routes'));
+    }
+
+
 
     listen(){
         this.app.listen(this.port, () =>{
