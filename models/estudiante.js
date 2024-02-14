@@ -1,6 +1,6 @@
 const { Schema, model} = require('mongoose');
 
-const UsuarioSchema = Schema({
+const estudianteSchema = Schema({
     nombreUsuario:{
         type: String,
         required: [true, 'El nombre es obligatorio']
@@ -15,10 +15,9 @@ const UsuarioSchema = Schema({
         required: [true, 'La contraseña es obligatoria']
     },
     role:{
-        type: String,
-        require: true,
-        enum: ["TEACHER_ROLE", "STUDENT_ROLE"]
+        type: Schema.Types.ObjectId,
+        ref: 'Role'
     }
 });
 
-module.exports = model('Usuario', UsuarioSchema);
+module.exports = model('Estudiante', estudianteSchema);
