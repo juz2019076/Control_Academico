@@ -15,8 +15,12 @@ const estudianteSchema = Schema({
         required: [true, 'La contraseña es obligatoria']
     },
     role:{
-        type: Schema.Types.ObjectId,
-        ref: 'Role'
+        type: String,
+        enum: ["TEACHER_ROLE", "STUDENT_ROLE"]
+    },
+    estado:{
+        type: Boolean,
+        default: true
     }
 });
 
