@@ -1,19 +1,25 @@
-const { Router } = require('express');
-const { check } = require('express-validator');
+// alumno.routes.js
 
-const { validarCampos } = require('../middlewares/validar-campos');
+const express = require('express');
+const router = express.Router();
+const estudianteController = require('../controllers/alumno.controller');
 
-const { estudiantesPost } = require('../controllers/estudiante.controller');
+// Ruta para el registro de un alumno
+router.post('/registro', estudianteController.registrarAlumno);
 
-const router = Router();
+// Ruta para el login de un alumno
+router.post('/login', estudianteController.loginAlumno);
 
-router.post(
-    "/", 
-    [
-        check("nombreUsuario", "El nombre no puede esta vacío").not().isEmpty(),
-        check("password", "El password debe ser mayor a 6 caracteres").isLength({min:6}),
-        check("email", "Este no es un correo válido").isEmail(),
-        validarCampos,
-    ], estudiantesPost);
+// Ruta para asignar un curso a un alumno
+router.put('/asignar-curso/:id', estudianteController.asignarCurso);
+
+// Ruta para obtener los cursos asignados a un alumno
+router.get('/cursos-asignados/:id', estudianteController.obtenerCursosAsignados);
+
+// Ruta para editar el perfil de un alumno
+router.put('/editar-perfil/:id', estudianteController.editarPerfil);
+
+// Ruta para eliminar el perfil de un alumno
+router.delete('/eliminar-perfil/:id', estudianteController.eliminarPerfil);
 
 module.exports = router;

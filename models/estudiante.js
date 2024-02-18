@@ -1,11 +1,11 @@
 const { Schema, model} = require('mongoose');
 
 const estudianteSchema = Schema({
-    nombreUsuario:{
+    nombre:{
         type: String,
         required: [true, 'El nombre es obligatorio']
     },
-    email:{
+    correo:{
         type: String,
         required: [true, 'El correo es obligatorio'],
         unique: true
@@ -16,12 +16,22 @@ const estudianteSchema = Schema({
     },
     role:{
         type: String,
-        enum: ["TEACHER_ROLE", "STUDENT_ROLE"]
+        enum: "STUDENT_ROLE"
     },
     estado:{
         type: Boolean,
         default: true
+    },
+    cursos:{
+        type: [String],
+        default: []
     }
 });
+
+estudianteSchema.metmethods.toJSON = function () {
+    const { __v, password, _id, ...estudiante } = this.toObject();
+    estudiante.uid = _id;
+    return estudiante;
+};
 
 module.exports = model('Estudiante', estudianteSchema);

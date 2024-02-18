@@ -1,82 +1,135 @@
-const bcryptjs = require('bcryptjs');
-const Estudiante = require('../models/estudiante');
-
 const { response } = require('express');
+const bcrypt = require('bcryptjs');
+const Alumno = require('../models/alumno');
 
-const usuariosGet = async (req, res = response) => {
-    const {limite, desde} = req.query;
-    const query = {estado: true};
+const registrarAlumno = async (req, res = response) => {
+    const { nombre, correo, password } = req.body;
+    try {
+        const existeAlumno = await Alumno.findOne({ correo });
+        if (existeAlumno) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Ya existe un alumno con ese correo electrónico'
+            });
+        }
+        const alumno = new Alumno(req.body);
+        const salt = bcrypt.genSaltSync();
+        alumno.password = bcrypt.hashSync(password, salt);
+        await alumno.save();
 
-    const [total, usuarios] = await Promise.all([
-        Usuario.countDocuments(query),
-        Usuario.find(query)
-        .skip(Number(desde))
-        .limit(Number(limite))
-    ]);
+        res.status(201).json({
+            ok: true,
+            msg: 'Alumno registrado exitosamente',
+            alumno
+        });
 
-    res.status(200).json({
-        total,
-        usuarios
-    });
-}
-
-const getUsuarioById = async (req, res) => {
-    const {id} = req.params;
-    const usuario = await Usuario.findOne({_id: id});
-
-    res.status(200).json({
-        usuario
-    });
-}
-
-const putUsuarios = async (req, res = response) =>{
-    const { id } = req.params;
-    const {_id, password, google, correo, ...resto } = req.body;
-
-    if(password){
-        const salt = bcryptjs.genSaltSync();
-        resto.password = bcryptjs.hashSync(password, salt);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al registrar el alumno'
+        });
     }
-
-    await Usuario.findByIdAndUpdate(id, resto);
-
-    const usuario = Usuario.findOne({id});
-
-    res.status(200).json({
-        msg: 'Usuario Actualizado Exitosamente!!!',
-        usuario
-    });
 }
 
-const estudiantesDelete = async (req, res) => {
-    const {id} = req.params;
-    const usuario = await Usuario.findByIdAndUpdate(id, {estado: false});
-    const usuarioAutenticado = req.usuario;
+const loginAlumno = async (req, res = response) => {
+    const { correo, password } = req.body;
+    try {
+        const alumno = await Alumno.findOne({ correo });
+        if (!alumno) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Credenciales incorrectas'
+            });
+        }
+        const validPassword = bcrypt.compareSync(password, alumno.password);
+        if (!validPassword) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Credenciales incorrectas'
+            });
+        }
+        res.json({
+            ok: true,
+            msg: 'Inicio de sesión exitoso',
+            alumno
+        });
 
-    res.status(200).json({
-        msg: 'Usuario a eliminar',
-        usuario,
-        usuarioAutenticado
-    });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al iniciar sesión'
+        });
+    }
 }
 
-const estudiantesPost = async (req, res) => {
-    const {nombreUsuario, email, password, role} = req.body;
-    const estudiante = new Estudiante({nombreUsuario, email, password, role});
+const editarPerfilAlumno = async (req, res = response) => {
+    const uid = req.params.id;
+    try {
+        const alumnoDB = await Alumno.findById(uid);
+        if (!alumnoDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontró un alumno con el ID proporcionado'
+            });
+        }
+        const { password, correo, ...campos } = req.body;
+        if (alumnoDB.correo !== correo) {
+            const existeCorreo = await Alumno.findOne({ correo });
+            if (existeCorreo) {
+                return res.status(400).json({
+                    ok: false,
+                    msg: 'Ya existe un alumno con ese correo electrónico'
+                });
+            }
+        }
+        if (password) {
+            const salt = bcrypt.genSaltSync();
+            campos.password = bcrypt.hashSync(password, salt);
+        }
+        const alumnoActualizado = await Alumno.findByIdAndUpdate(uid, campos, { new: true });
+        res.json({
+            ok: true,
+            msg: 'Alumno actualizado correctamente',
+            alumno: alumnoActualizado
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al actualizar el perfil del alumno'
+        });
+    }
+}
 
-    const salt = bcryptjs.genSaltSync();
-    estudiante.password = bcryptjs.hashSync(password, salt);
-
-    await estudiante.save();
-    res.status(202).json({
-        estudiante
-    });
+const eliminarAlumno = async (req, res = response) => {
+    const uid = req.params.id;
+    try {
+        const alumnoDB = await Alumno.findById(uid);
+        if (!alumnoDB) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'No se encontró un alumno con el ID proporcionado'
+            });
+        }
+        await Alumno.findByIdAndDelete(uid);
+        res.json({
+            ok: true,
+            msg: 'Alumno eliminado correctamente'
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al eliminar el alumno'
+        });
+    }
 }
 
 module.exports = {
-    estudiantesPost,
-    usuariosGet,
-    getUsuarioById,
-    putUsuarios,
-    estudiantesDelete
-}
+    registrarAlumno,
+    loginAlumno,
+    editarPerfilAlumno,
+    eliminarAlumno
+};
