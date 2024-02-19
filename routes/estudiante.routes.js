@@ -1,25 +1,10 @@
-// alumno.routes.js
-
 const express = require('express');
 const router = express.Router();
-const estudianteController = require('../controllers/alumno.controller');
+const alumnoController = require('../controllers/estudiante.controller');
 
-// Ruta para el registro de un alumno
-router.post('/registro', estudianteController.registrarAlumno);
+router.post('/registro', alumnoController.registro);
+router.post('/login', alumnoController.login);
+router.put('/perfil/:id', alumnoController.actualizarPerfil);
 
-// Ruta para el login de un alumno
-router.post('/login', estudianteController.loginAlumno);
-
-// Ruta para asignar un curso a un alumno
-router.put('/asignar-curso/:id', estudianteController.asignarCurso);
-
-// Ruta para obtener los cursos asignados a un alumno
-router.get('/cursos-asignados/:id', estudianteController.obtenerCursosAsignados);
-
-// Ruta para editar el perfil de un alumno
-router.put('/editar-perfil/:id', estudianteController.editarPerfil);
-
-// Ruta para eliminar el perfil de un alumno
-router.delete('/eliminar-perfil/:id', estudianteController.eliminarPerfil);
 
 module.exports = router;

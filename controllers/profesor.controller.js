@@ -1,108 +1,76 @@
+const bcryptjs = require('bcryptjs');
 const Profesor = require('../models/profesor');
+const { response } = require('express');
 
-const crearProfesor = async (req, res) => {
-  try {
-    const { nombre, correo, password } = req.body;
-    const profesor = new Profesor({ nombre, correo, password });
+const profesorGet = async (req, res = response) => {
+  const {limite, desde} = req.query;
+  const query = {estado: true};
+
+  const [total, profesor] = await Promise.all([
+      Profesor.countDocuments(query),
+      Profesor.find(query)
+      .skip(Number(desde))
+      .limit(Number(limite))
+  ]);
+
+  res.status(200).json({
+      total,
+      profesor
+  });
+};
+
+const getProfesorById = async (req, res) => {
+  const {id} = req.params;
+  const profesor = await Profesor.findOne({_id: id});
+
+  res.status(200).json({
+      profesor
+  });
+};
+
+const profesorPut = async (req, res = response) => {
+  const { id } = req.params;
+  const {_id, password,  correo,  ...resto } = req.body;
+  if(password){
+      const salt = bcryptjs.genSaltSync();
+      resto.password = bcryptjs.hashSync(password, salt);
+  }
+  const profesor =  await Profesor.findByIdAndUpdate(id, resto);
+  res.status(200).json({
+      msg: 'Profesor Actualizado Exitosamente!!!',
+      profesor
+  });
+}
+
+const profesorDelete = async (req, res) => {
+  const {id} = req.params;
+  const profesor = await Profesor.findByIdAndUpdate(id, {estado: false});
+  const profesorAutenticado = req.profesor;
+
+  res.status(200).json({
+      msg: 'Profesor a eliminar',
+      profesor,
+      profesorAutenticado
+  });
+};
+
+const ProfesorPost = async (req, res) => {
+    const { nombre, correo, password, role } = req.body;
+    const profesor = new Profesor({ nombre, correo, password, role });
+
+    const salt = bcryptjs.genSaltSync();
+    profesor.password = bcryptjs.hashSync(password, salt);
+
     await profesor.save();
-    res.status(201).json({
-      ok: true,
+    res.status(202).json({
       profesor
     });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      ok: false,
-      mensaje: 'Error al crear el profesor'
-    });
-  }
-};
-const obtenerProfesores = async (req, res) => {
-  try {
-    const profesores = await Profesor.find();
-    res.json({
-      ok: true,
-      profesores
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      ok: false,
-      mensaje: 'Error al obtener los profesores'
-    });
-  }
-};
-const obtenerProfesorPorId = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const profesor = await Profesor.findById(id);
-    if (!profesor) {
-      return res.status(404).json({
-        ok: false,
-        mensaje: 'Profesor no encontrado'
-      });
-    }
-    res.json({
-      ok: true,
-      profesor
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      ok: false,
-      mensaje: 'Error al obtener el profesor'
-    });
-  }
-};
-
-const actualizarProfesor = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nombre, correo, password } = req.body;
-    const profesorActualizado = await Profesor.findByIdAndUpdate(
-      id,
-      { nombre, correo, password },
-      { new: true }
-    );
-    if (!profesorActualizado) {
-      return res.status(404).json({
-        ok: false,
-        mensaje: 'Profesor no encontrado'
-      });
-    }
-    res.json({
-      ok: true,
-      profesor: profesorActualizado
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      ok: false,
-      mensaje: 'Error al actualizar el profesor'
-    });
-  }
-};
-const eliminarProfesor = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Profesor.findByIdAndDelete(id);
-    res.json({
-      ok: true,
-      mensaje: 'Profesor eliminado correctamente'
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      ok: false,
-      mensaje: 'Error al eliminar el profesor'
-    });
-  }
 };
 
 module.exports = {
-  crearProfesor,
-  obtenerProfesores,
-  obtenerProfesorPorId,
-  actualizarProfesor,
-  eliminarProfesor
-};
+    ProfesorPost,
+    profesorGet,
+    getProfesorById,
+    profesorPut,
+    profesorDelete
+}

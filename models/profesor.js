@@ -1,37 +1,38 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model} = require('mongoose');
 
-const ProfesorSchema = Schema({
-    nombre: {
+const profesorSchema = Schema({
+    nombre:{
         type: String,
         required: [true, 'El nombre es obligatorio']
     },
-    correo: {
+    correo:{
         type: String,
         required: [true, 'El correo es obligatorio'],
         unique: true
     },
-    password: {
+    password:{
         type: String,
         required: [true, 'La contraseña es obligatoria']
     },
-    role: {
+    role:{
         type: String,
         default: "TEACHER_ROLE"
     },
-    estado: {
+    estado:{
         type: Boolean,
         default: true
     },
-    cursos: {
+    cursos:{
         type: [String],
         default: []
     }
+
 });
 
-ProfesorSchema.methods.toJSON = function () {
-    const { __v, password, _id, ...profesor } = this.toObject();
+profesorSchema.methods.toJSON = function(){
+    const{ __v, password, _id, ...profesor} = this.toObject();
     profesor.uid = _id;
     return profesor;
 };
 
-module.exports = model('Profesor', ProfesorSchema);
+module.exports = model('Profesor', profesorSchema);

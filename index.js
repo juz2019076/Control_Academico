@@ -1,4 +1,13 @@
-const Server = require('./models/server');
-require('dotenv').config(); 
-const server = new Server();
-server.listen();
+const express = require('express');
+const app = express();
+const routes = require('./routes');
+
+// Configuración del middleware
+app.use(express.json());
+
+// Usar las rutas definidas
+app.use('/index', routes);
+
+// Puerto del servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
