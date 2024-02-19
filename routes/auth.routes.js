@@ -1,16 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const alumnoController = require('./estudiante.routes');
-const maestroController = require('./profesor.routes');
+const { Router } = require('express');
+const { check } =  require('express-validator');
 
-// Rutas para Alumnos
-router.post('/estudiante/registro', alumnoController.registro);
-router.post('/estudiante/login', alumnoController.login);
-router.put('/estudiante/:id', alumnoController.actualizarPerfil);
+const { login } = require('../controller/auth-controller');
+const { validarCampos } =  require('../middlewares/validar-campos');
 
-// Rutas para Maestros
-router.post('/profesor/registro', maestroController.registro);
-router.post('/profesor/login', maestroController.login);
-router.post('/profesor/crear-curso', maestroController.crearCurso);
+const router = Router();
+
+router.post(
+    '/login',
+    [
+        check('correo', "Este no es un correo válido").isEmail(),
+        check('password'," el password es obligatorio").not().isEmpty(),
+        validarCampos
+    ], login);
 
 module.exports = router;
