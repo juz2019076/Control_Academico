@@ -1,15 +1,15 @@
 const { request, response } = require("express");
-const Alumno = require("../models/estudiante")
-const Maestro = require("../models/profesor");
+const Estudiante = require("../models/estudiante")
+const Profesor = require("../models/profesor");
 const bcryptjs = require('bcryptjs');
 const { generarJWT } = require('../helpers/generar-jwt');
 
 const login = async (req = request, res = response) => {
     const { correo, password } = req.body;
     try {
-        let usuario = await Alumno.findOne({ correo });
+        let usuario = await Estudiante.findOne({ correo });
         if (!usuario) {
-            usuario = await Maestro.findOne({ correo });
+            usuario = await Profesor.findOne({ correo });
             if (!usuario) {
                 return res.status(400).json({
                     msg: "Credenciales incorrectas, correo no existe en la base de datos."
@@ -29,7 +29,7 @@ const login = async (req = request, res = response) => {
         }
         const token = await generarJWT(usuario.id);
         res.status(200).json({
-            msg: "Bienvenido",
+            msg: "Bienvenido!!",
             usuario,
             token
         });
