@@ -21,7 +21,26 @@ router.get("/", estudianteGet);
 router.put(
     "/:id",
     [
+        check('id', 'No es un id válido').isMongoId(),
+        check('id').custom(existeEstudianteById),
+        check("curso", "Solo puedes asignarte a 3 cursos").isArray({ max: 3 }),
+        check('curso.*').custom(async (cursoId) => {
+            if (!cursoId) {
 
+                return true;
+            }
+            await existeCursoByIdA(cursoId);
+    
+            return true;
+        }),
+        check('curso.*').custom(async (cursoId, { req }) => {
+            const estudianteId = req.params.id;
+            if (await existeAsignaEstCurso(estudianteId, cursoId)) {
+                throw new Error('El estudiante ya está asignado a este curso');
+            }
+            return true;
+        }),
+        validarCampos
     ], estudiantePut);
 
 router.get(
@@ -29,23 +48,11 @@ router.get(
     [
         check('id', 'No es un id válido').isMongoId(),
         check('id').custom(existeEstudianteById),
-        check("curso", "No puedes asignarte a más de 3 cursos").isArray({max: 3}),
-        check('curso.*').custom(async (cursoId, { req }) => {
-                const estudianteId = req.params.id;
-                if (await existeEstudianteAlumnoCurso(estudianteId, cursoId)) {
-                    throw new Error('El estudiante ya está asignado a este curso');
-                }
-                return true;
-            }),
-        validarCampos
     ], getEstudianteById);
 
 router.delete(
 "/:id",
-    [ 
-        //validarJWT,
-        //esAdminRole,
-        //tieneRolAutorizado('ADMIN_ROLE','SUPER_ROLE'),
+    [
         check('id', 'No es un id válido').isMongoId(),
         check('id').custom(existeEstudianteById),
         validarCampos
