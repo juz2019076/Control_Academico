@@ -3,15 +3,16 @@ const mongoose = require('mongoose');
 const cursoSchema = new mongoose.Schema({
   nombre: {
     type: String,
-    required: true
+    required: [true, 'EL nombre es obligatorio'],
+    unique: true
   },
-  maestro: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Maestro'
+  descripcion: {
+    type: String,
+    require: [true, 'Es necesario una breve descripción']
   },
-  alumnos: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Alumno'
+  estado: [{
+    type: Boolean,
+    require: true
   }]
 });
 
