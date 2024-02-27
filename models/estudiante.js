@@ -3,23 +3,27 @@ const mongoose = require('mongoose');
 const estudianteSchema = new mongoose.Schema({
   nombre: {
     type: String,
-    required: true
+    required: [true, 'El nombre es obligatorio']
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'El correo es obligatorio'],
     unique: true
   },
   password: {
     type: String,
-    required: true
+    required: [true, 'La contraseña es obligatoria']
   },
-  rol: {
+  role: {
     type: String,
     default: 'STUDENT_ROLE'
   },
+  estado:{
+    type: Boolean,
+    default: true
+  },
   cursos: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: [Schema.Types.ObjectId],
     ref: 'Curso'
   }]
 });
