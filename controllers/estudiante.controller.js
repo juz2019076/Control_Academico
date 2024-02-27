@@ -38,13 +38,13 @@ const estudiantePut = async (req, res = response) => {
       if (!curso) {
           return res.status(400).json({ error: 'No definiste el campo "Curso" en tu solicitud' });
       }
-      const cursosExistentes = await Curso.find({ _id: { $in: curso } }).lean();
+      const cursosExistentes = await Curso.find({ _id: { $in: curso } });
+      
       if (cursosExistentes.length !== curso.length) {
-          const cursosIdsExistentes = cursosExistentes.map(curso => curso._id.toString());
-          const cursosIdsNoExistentes = curso.filter(id => !cursosIdsExistentes.includes(id));
-          return res.status(400).json({ error: `Los siguientes cursos no existen en la base de datos: ${cursosIdsNoExistentes.join(', ')}` });
+          return res.status(400).json({ error: `Los siguientes cursos no existen en la base de datos:`});
       }  
       const estudiante = await Estudiante.findByIdAndUpdate(id, { ...resto, curso });  
+      
       res.status(200).json({
           msg: 'Estudiante actualizado exitosamente!!!',
           estudiante
@@ -68,8 +68,8 @@ const estudianteDelete = async (req, res) => {
 }
 
 const estudiantePost = async (req, res) => {
-    const { nombre, correo, password } = req.body;
-    const estudiante = new Estudiante({ nombre, correo, password });
+    const { nombre, email, password } = req.body;
+    const estudiante = new Estudiante({ nombre, email, password });
     const salt = bcryptjs.genSaltSync();
     estudiante.password = bcryptjs.hashSync(password, salt);
     await estudiante.save();
