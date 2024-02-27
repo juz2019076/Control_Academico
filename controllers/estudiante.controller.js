@@ -7,7 +7,7 @@ const estudianteGet = async (req, res = response) => {
     const {limite, desde} = req.query;
     const query = {estado: true};
 
-    const [total, estudiantes] = await Promise.all([
+    const [total, estudiante] = await Promise.all([
         Estudiante.countDocuments(query),
         Estudiante.find(query)
         .skip(Number(desde))
@@ -16,7 +16,7 @@ const estudianteGet = async (req, res = response) => {
 
     res.status(200).json({
         total,
-        estudiantes
+        estudiante
     });
 }
 

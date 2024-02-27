@@ -22,10 +22,10 @@ const estudianteSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  cursos: [{
-    type: [Schema.Types.ObjectId],
+  cursos: {
+    type: [mongoose.Schema.Types.ObjectId],
     ref: 'Curso'
-  }]
+  }
 });
 
 estudianteSchema.methods.toJSON = function(){
