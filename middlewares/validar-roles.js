@@ -9,7 +9,7 @@ const TeacherRole = (req, res, next) => {
 
     if (user && user.role !== "TEACHER_ROLE") {
         return res.status(401).json({
-            msg: `${user.nombre} no es un Teacher, no tienes acceso a esto`
+            msg: `${user.nombre} no eres Teacher, no tienes acceso`
         });
     };
     next();

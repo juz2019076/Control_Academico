@@ -16,7 +16,7 @@ const validarJWT = async(req = request, res = response, next)=> {
         const profesor = await Profesor.findById(uid);
         if(!profesor){
             return res.status(401).json({
-                msg: "not found/no teacher"
+                msg: "Not found/No teacher"
             });
         }
         if(!profesor.estado){

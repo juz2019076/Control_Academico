@@ -28,7 +28,7 @@ const existeAsignaProfCurso = async (profesorId, cursoId) => {
     const asignacion = await Profesor.findOne({ _id: profesorId, curso: cursoId });
     return asignacion !== null;
 };
-//--------------------------------------------------------------------------------------
+//------------------------------------------------ Cursos --------------------------------------
 const existeCursoById = async (id = '') => {
     const existeCurso = await Curso.findOne({id});
     if(existeCurso){
