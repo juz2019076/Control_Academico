@@ -1,55 +1,38 @@
-const { Router } = require('express');
-const { check } = require('express-validator');
+const express = require('express');
+const router = express.Router();
+const { cursosGet, cursosPut, cursosDelete, cursosPost } = require('../controllers/cursos.controller');
+const { validarCampos, validarRolTeacher } = require("../middlewares/validar-campos");
+const { existeCursoByNombre, existeCursoById } = require("../helpers/db-validators");
+const { check } = require("express-validator");
 
-const { validarCampos } = require('../middlewares/validar-campos');
-const { validarJWT } = require('../middlewares/validar-jwt');
+router.get('/', cursosGet);
 
-const { cursosPost, cursosGet, getCursoById, putCursos, cursosDelete } = require('../controller/curso.controller');
+router.put('/:id', [
+    check("nombre").optional(),
+    check("nombre").custom((value, { req }) => {
+        if (req.body.nombre && req.body.nombre !== value) {
+            return existeCursoByNombre(value);
+        }
+        return true;
+    }),
+    check("maestroId", "Debe proporcionar la ID del maestro.").isMongoId(),
+    validarCampos,
+    validarRolTeacher
+], cursosPut);
 
-const { existeCursoById } = require('../helpers/db-validators');
-const { tieneRolAutorizado } = require('../middlewares/validar-roles');
-const { esTeacherRole } = require("../middlewares/validar-roles");
 
-const router = Router();
+router.delete('/:id', [
+    check("id", "El id no es un formato válido de MongoDB").isMongoId(),
+    check("id").custom(existeCursoById),
+    validarCampos,
+    validarRolTeacher
+], cursosDelete);
 
-router.get("/", cursosGet);
+router.post('/', [
+    check("nombre", "El nombre es obligatorio").not().isEmpty(),
+    check("nombre").custom(existeCursoByNombre),
+    check("maestro", "Debes escribir tu correo").isEmail(),
+    validarCampos
+], cursosPost);
 
-router.post(
-    "/",
-    [
-        validarJWT,
-        esTeacherRole,
-        check("nombre", "El nombre no puede estar vacio").not().isEmpty(),
-        check("descripcion", "La descripcion no puede estar vacia").not().isEmpty(),
-        validarCampos,
-    ], cursosPost);
-router.get(
-    "/:id",
-    [
-        check('id', 'No es un id valido').isMongoId(),
-        check('id').custom(existeCursoById),
-        validarCampos
-    ], getCursoById);
-router.put(
-    "/:id",
-    [
-        validarJWT,
-        esTeacherRole,
-        tieneRolAutorizado('TEACHER_ROLE', 'SUPER_ROLE'),
-        check('id', 'No es un id valido').isMongoId(),
-        check('id').custom(existeCursoById),
-
-        validarCampos
-    ], putCursos);
-    router.delete(
-        "/:id",
-        [
-            validarJWT,
-            esTeacherRole,
-            tieneRolAutorizado('TEACHER_ROLE', 'SUPER_ROLE'),
-            check('id', 'No es un id válido').isMongoId(),
-            check('id').custom(existeCursoById),
-            validarCampos
-        ], 
-        cursosDelete
-    );
+module.exports = router;
